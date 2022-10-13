@@ -27,7 +27,7 @@ public class JDBCClienteDAO implements ClienteDAO{
             Connection con = fabricaConexoes.getConnection();
 
             //preparando o comando sql
-            PreparedStatement pstm = con.prepareStatement("INSERT INTO clientes(nome,cpf,email,telefone) VALUES (?,?,?,?)");
+            PreparedStatement pstm = con.prepareStatement("INSERT INTO oo_clientes(nome,cpf,email,telefone) VALUES (?,?,?,?)");
             
             //ajustando os parâmetros do comando
             pstm.setString(1, cliente.getNome());
@@ -61,7 +61,7 @@ public class JDBCClienteDAO implements ClienteDAO{
             //criando uma conexão
             Connection con = fabricaConexoes.getConnection(); 
             
-            PreparedStatement pstm = con.prepareStatement("SELECT * FROM clientes");
+            PreparedStatement pstm = con.prepareStatement("SELECT * FROM oo_clientes");
 
             ResultSet rs = pstm.executeQuery();
             
@@ -75,6 +75,10 @@ public class JDBCClienteDAO implements ClienteDAO{
                 Cliente c = new Cliente(id,nome, cpf, email, telefone);
                 clientes.add(c);
             }
+
+            pstm.close();
+            con.close();
+            
             return clientes;
 
         }catch(SQLException e){
