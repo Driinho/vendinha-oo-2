@@ -11,8 +11,12 @@ import ifpr.pgua.eic.vendinha2022.model.FabricaConexoes;
 import ifpr.pgua.eic.vendinha2022.model.entities.Produto;
 import ifpr.pgua.eic.vendinha2022.model.results.Result;
 
-public class JDBCProdutoDAO implements ProdutoDAO{
-    
+public class JDBCProdutoDAO implements ProdutoDAO {
+
+    private static final String INSERT = "INSERT INTO oo_produtos(nome,descricao,valor,quantidadeEstoque) VALUES(?,?,?,?);";
+    private static final String LIST_ALL = "SELECT * FROM oo_produtos;";
+    private static final String SELECT_BY_ID = "SELECT * FROM oo_produtor WHERE id=?;";
+
     private FabricaConexoes fabricaConexoes;
 
     public JDBCProdutoDAO(FabricaConexoes fabricaConexoes) {
@@ -24,12 +28,12 @@ public class JDBCProdutoDAO implements ProdutoDAO{
         try {
             Connection con = fabricaConexoes.getConnection();
 
-            PreparedStatement pstm = con.prepareStatement("INSERT INTO oo_produtos(nome,descricao,valor,quantidadeEstoque) VALUES(?,?,?,?);");
+            PreparedStatement pstm = con.prepareStatement(INSERT);
             pstm.setString(1, produto.getNome());
             pstm.setString(2, produto.getDescricao());
             pstm.setDouble(3, produto.getValor());
             pstm.setDouble(4, produto.getQuantidadeEstoque());
-        
+
             pstm.execute();
 
             pstm.close();
@@ -52,18 +56,12 @@ public class JDBCProdutoDAO implements ProdutoDAO{
         try {
             Connection con = fabricaConexoes.getConnection();
 
-            PreparedStatement pstm = con.prepareStatement("SELECT * FROM oo_produtos");
+            PreparedStatement pstm = con.prepareStatement(LIST_ALL);
 
             ResultSet resultSet = pstm.executeQuery();
 
-            while(resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String nome = resultSet.getString("nome");
-                String descricao = resultSet.getString("descricao");
-                Double valor = resultSet.getDouble("valor");
-                Double quantidadeEstoque = resultSet.getDouble("quantidadeEstoque");
-
-                produtos.add(new Produto(id, nome, descricao, valor, quantidadeEstoque));
+            while (resultSet.next()) {
+                produtos.add(buildObject(resultSet));
             }
 
             pstm.close();
@@ -78,6 +76,23 @@ public class JDBCProdutoDAO implements ProdutoDAO{
 
     @Override
     public Produto getById(int id) {
+        try {
+            Connection con = fabricaConexoes.getConnection();
+
+            PreparedStatement statement = con.prepareStatement(SELECT_BY_ID);
+            statement.setInt(1, id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            statement.close();
+            con.close();
+
+            while (resultSet.next()) {
+                return buildObject(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -86,5 +101,19 @@ public class JDBCProdutoDAO implements ProdutoDAO{
         return null;
     }
 
+    public Produto buildObject(ResultSet resultSet) {
+        try {
+            int id = resultSet.getInt("id");
+            String nome = resultSet.getString("nome");
+            String descricao = resultSet.getString("descricao");
+            Double valor = resultSet.getDouble("valor");
+            Double quantidadeEstoque = resultSet.getDouble("quantidadeEstoque");
+            return new Produto(id, nome, descricao, valor, quantidadeEstoque);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
 }

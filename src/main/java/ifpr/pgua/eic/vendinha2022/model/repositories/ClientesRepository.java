@@ -9,32 +9,32 @@ import ifpr.pgua.eic.vendinha2022.model.entities.Cliente;
 import ifpr.pgua.eic.vendinha2022.model.results.Result;
 
 public class ClientesRepository {
-    
+
     private List<Cliente> clientes;
     private ClienteDAO dao;
 
-    public ClientesRepository(ClienteDAO dao){
+    public ClientesRepository(ClienteDAO dao) {
         this.dao = dao;
     }
 
-    public Result adicionarCliente(String nome, String cpf, String email, String telefone){
+    public Result adicionarCliente(String nome, String cpf, String email, String telefone) {
 
-        Optional<Cliente> busca = clientes.stream().filter((cli)->cli.getCpf().equals(cpf)).findFirst();
-        
-        if(busca.isPresent()){
+        Optional<Cliente> busca = clientes.stream().filter((cli) -> cli.getCpf().equals(cpf)).findFirst();
+
+        if (busca.isPresent()) {
             return Result.fail("Cliente já cadastrado!");
         }
 
-        Cliente cliente = new Cliente(nome,cpf,email,telefone);
-        
+        Cliente cliente = new Cliente(nome, cpf, email, telefone);
+
         return dao.create(cliente);
-            
+
     }
 
-    public Result atualizarCliente(String cpf, String novoEmail, String novoTelefone){
-        Optional<Cliente> busca = clientes.stream().filter((cli)->cli.getCpf().equals(cpf)).findFirst();
-        
-        if(busca.isPresent()){
+    public Result atualizarCliente(String cpf, String novoEmail, String novoTelefone) {
+        Optional<Cliente> busca = clientes.stream().filter((cli) -> cli.getCpf().equals(cpf)).findFirst();
+
+        if (busca.isPresent()) {
             Cliente cliente = busca.get();
             cliente.setEmail(novoEmail);
             cliente.setTelefone(novoTelefone);
@@ -44,11 +44,8 @@ public class ClientesRepository {
         return Result.fail("Cliente não encontrado!");
     }
 
-    public List<Cliente> getClientes(){
+    public List<Cliente> getClientes() {
         clientes = dao.listAll();
         return Collections.unmodifiableList(clientes);
     }
-
-
-
 }
